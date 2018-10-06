@@ -6,13 +6,15 @@ $(document).ready(function(){
   wrong.src="https://www.soundjay.com/button/sounds/button-10.mp3";
   var timeUp = new Audio();
   timeUp.src ="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3";
-  var heightWidth=360;
-  var radius=110;
+  var heightWidth=380;
+  var radius=90;
   var points=0;
   var correctAnswer=[];
   var input="";
   var count=10;
   var mode="major";
+  var verticalAdjustment=20;
+  //var keyNames=document.querySelectorAll("svg .key");
   let keySigArr=[//last number of each array represents id
                     ["0 sharps/flats", "C major", "a minor", "#key0", "C", "a"],
                     ["1 sharp", "G major", "a minor", "#key1", "G", "e"],
@@ -35,21 +37,21 @@ $(document).ready(function(){
     $("#boundaries").attr("height", heightWidth.toString() );
     $("#boundaries").attr("width", heightWidth.toString() );
     $("#circle").attr("cx", (heightWidth/2).toString());
-    $("#circle").attr("cy", (heightWidth/2).toString());
+    $("#circle").attr("cy", (heightWidth/2-verticalAdjustment).toString());
     $("#circle").attr("r", radius.toString() );
   };
 
   function setCoordinates(angle, r, centerPoint, ID){
        var radians=(angle*Math.PI)/180;
         var X=Math.round(Math.cos(radians)*r + centerPoint);
-        var Y=Math.round(centerPoint-Math.sin(radians)*r);
+        var Y=Math.round(centerPoint-Math.sin(radians)*r-verticalAdjustment);
         $(ID).attr("x", X.toString() );
         $(ID).attr("y", Y.toString() );
   };
 
   function addKeyNames(heightWidth, radius){
     var centerPoint=heightWidth/2;
-    var r=radius + 20;//add distance to make keys appear outside of the circle
+    var r=radius + 35;//add distance to make keys appear outside of the circle
     var position=0;//position on the circle
     var modeIndex;
     if (mode==="major"){
@@ -67,11 +69,11 @@ $(document).ready(function(){
     for (x=-240; x<=-150; x+=30){//sets coordinates for F-Ab
       ID="#key"+position;
       setCoordinates(x, r, centerPoint, ID);
-      $(ID).html(keySigArr[position][modeIndex]);//
+      $(ID).html(keySigArr[position][modeIndex]);
       position++;
     };
     position=14
-    r=r+40
+    r=r+55
     for (x=-60; x>=-120; x-=30){//sets coordinates for Db, Gb and Cb
       ID="#key"+position;
       setCoordinates(x, r, centerPoint, ID);
@@ -88,15 +90,22 @@ $(document).ready(function(){
 
   function addStartPrompt(){
     $("#key-sig").attr("x", (heightWidth/2).toString() );
-    $("#key-sig").attr("y", (heightWidth/2).toString() );
-    $("#key-sig").html("Click Start to Begin");
+    $("#key-sig").attr("y", (heightWidth/2).toString()-verticalAdjustment );
+    $("#key-sig").html("Click Start");
   };
 
   function addKeySig(keySig){
     $("#key-sig").attr("x", (heightWidth/2).toString() );
-    $("#key-sig").attr("y", (heightWidth/2).toString() );
+    $("#key-sig").attr("y", (heightWidth/2).toString()-verticalAdjustment );
     $("#key-sig").html(function(){
       return keySig[0];
+    });
+  };
+
+  function removeKeyNameEventListeners() {
+    var keyNames=document.querySelectorAll("svg .key");
+    keyNames.forEach(function(keyName){
+      keyName.removeEventListener("click", handleClick);
     });
   };
 
@@ -107,25 +116,25 @@ $(document).ready(function(){
         correct.play();
         points++;
         document.getElementById("score").innerHTML="Score: "+points;
-        document.removeEventListener("click",handleClick);
         displayResult(true);
       } else {
         wrong.play();
         points--;
         document.getElementById("score").innerHTML="Score: "+points;
-        document.removeEventListener("click",handleClick);
         displayResult(false);
       }
+      //remove eventListener
+      removeKeyNameEventListeners();
      };
   };
 
   function displayResult(isCorrect){
     if (isCorrect){
       var colorChange="green";
-      var message="CORRECT! +1"
+      var message="CORRECT!"
     } else {
       var colorChange="red";
-      var message="WRONG! -1";
+      var message="WRONG!";
     };
     document.getElementById("circle").setAttribute("fill", colorChange);
     document.getElementById("key-sig").innerHTML = message;
@@ -142,12 +151,13 @@ $(document).ready(function(){
     var count=30;
     var go= setInterval(function(){
         if (count<=0){
-        document.getElementById("timer").innerHTML = "Time: "+count;
-        timeIsUp();
-        clearInterval(go);
+          document.getElementById("timer").innerHTML = "Time: "+count;
+          timeIsUp();
+          clearInterval(go);
+          removeKeyNameEventListeners();
         } else {
-        document.getElementById("timer").innerHTML = "Time: "+count;
-        }
+          document.getElementById("timer").innerHTML = "Time: "+count;
+        };
         count--;
       }, 1000);
   };
@@ -156,7 +166,12 @@ $(document).ready(function(){
       let num=Math.floor(Math.random() * 15);
       correctAnswer=keySigArr[num];
       addKeySig(correctAnswer);
-      document.addEventListener("click", handleClick);
+      //select svg elements with class key
+      var keyNames=document.querySelectorAll("svg .key");
+      //add event listener
+      keyNames.forEach(function (keyName){
+        keyName.addEventListener("click", handleClick);
+      });
   };
 
   function toggleOn(){
@@ -184,7 +199,7 @@ $(document).ready(function(){
 
   function timeIsUp(){
     timeUp.play();
-    document.removeEventListener("click",handleClick);
+    //removeKeyNameEventListeners();
     document.getElementById("key-sig").innerHTML = "Time Is Up!";
     setTimeout(function(){
       document.getElementById("key-sig").innerHTML = "Your Score: "+points;
