@@ -1,11 +1,11 @@
 $(document).ready(function(){
 
   var correct = new Audio();
-  correct.src="https://www.soundjay.com/button/sounds/button-09.mp3";
+  correct.src="./sounds/correct.wav";
   var wrong = new Audio();
-  wrong.src="https://www.soundjay.com/button/sounds/button-10.mp3";
+  wrong.src="./sounds/wrong.wav";
   var timeUp = new Audio();
-  timeUp.src ="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3";
+  timeUp.src ="./sounds/time-up.wav";
   var heightWidth=380;
   var radius=90;
   var points=0;
